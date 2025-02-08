@@ -32,3 +32,13 @@ jobs:
           NAUKRI_PASSWORD: ${{ secrets.NAUKRI_PASSWORD }}
         run: |
           python update_profile.py
+
+      - name: Upload debugging artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: debugging-artifacts
+          path: |
+            error_screenshot.png
+            error_page.html
+          retention-days: 30

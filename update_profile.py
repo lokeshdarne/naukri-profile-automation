@@ -11,9 +11,9 @@ class NaukriUpdate:
         # Start Playwright
         self.playwright = sync_playwright().start()
 
-        # Launch Chromium in headed mode (headless=False)
+        # Launch Chromium in headless mode (set headless=True)
         self.browser = self.playwright.chromium.launch(
-            headless=True,
+            headless=False,
             args=[
                 "--disable-blink-features=AutomationControlled",
                 "--disable-notifications",
@@ -43,9 +43,11 @@ class NaukriUpdate:
             page.goto("https://www.naukri.com/")
             time.sleep(random.uniform(5, 10))
             
-            # Click the login layer.
+            # Wait for the login layer to appear, scroll it into view and force click it.
             page.wait_for_selector("#login_Layer", timeout=40000)
-            page.click("#login_Layer")
+            login_locator = page.locator("#login_Layer")
+            login_locator.scroll_into_view_if_needed()
+            login_locator.click(force=True)
             
             # Fill in the login fields.
             page.wait_for_selector("xpath=//*[text()='Email ID / Username']/following-sibling::input", timeout=40000)
@@ -82,6 +84,10 @@ class NaukriUpdate:
             print("Profile updated successfully")
             
         except Exception as e:
+            # On error, capture a screenshot and HTML dump for debugging.
+            page.screenshot(path="error_screenshot.png")
+            with open("error_page.html", "w", encoding="utf-8") as f:
+                f.write(page.content())
             print(f"Error occurred: {e}")
             raise
             
