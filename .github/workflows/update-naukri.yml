@@ -31,7 +31,7 @@ jobs:
           NAUKRI_USERNAME: ${{ secrets.NAUKRI_USERNAME }}
           NAUKRI_PASSWORD: ${{ secrets.NAUKRI_PASSWORD }}
         run: |
-          python update_profile.py
+          xvfb-run python update_profile.py
 
       - name: Upload debugging artifacts
         if: always()
