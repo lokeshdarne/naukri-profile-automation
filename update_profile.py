@@ -8,8 +8,10 @@ class NaukriUpdate:
         self.username = username
         self.password = password
 
+        # Start Playwright
         self.playwright = sync_playwright().start()
-        # Launch Chromium in headed mode with similar options as the Selenium code.
+
+        # Launch Chromium in headed mode (headless=False)
         self.browser = self.playwright.chromium.launch(
             headless=False,
             args=[
@@ -20,24 +22,26 @@ class NaukriUpdate:
                 "--window-size=1920,1080"
             ]
         )
+
         # Create a browser context with a custom user agent and viewport.
         self.context = self.browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080}
         )
-        # Inject an initialization script to hide the automation flag.
+        
+        # Hide the webdriver flag
         self.context.add_init_script("""
             Object.defineProperty(navigator, 'webdriver', {
                 get: () => undefined
             });
         """)
+        
         self.page = self.context.new_page()
-        os.makedirs("screenshots", exist_ok=True)
 
     def login_and_update_profile(self):
         page = self.page
         try:
-            # Open the Naukri homepage and wait for a random period.
+            # Open the Naukri homepage and wait a random period.
             page.goto("https://www.naukri.com/")
             time.sleep(random.uniform(5, 10))
             
@@ -55,11 +59,11 @@ class NaukriUpdate:
             page.wait_for_selector("xpath=//button[@type='submit' and text()='Login']", timeout=40000)
             page.click("xpath=//button[@type='submit' and text()='Login']")
             
-            # Wait briefly to let the login process complete, then refresh the page.
+            # Wait briefly and reload the page.
             time.sleep(random.uniform(3, 5))
             page.reload()
             
-            # Wait for and click the profile link.
+            # Navigate to the profile page.
             page.wait_for_selector("xpath=//a[@href='/mnjuser/profile']", timeout=40000)
             page.click("xpath=//a[@href='/mnjuser/profile']")
             
@@ -78,14 +82,11 @@ class NaukriUpdate:
             page.click("xpath=//button[text()='Save']")
             
             print("Profile updated successfully")
-            return True
-
+            
         except Exception as e:
-            print(f"Error occurred: {str(e)}")
-            timestamp = time.strftime("%Y%m%d-%H%M%S")
-            self.page.screenshot(path=f"screenshots/error_{timestamp}.png")
+            print(f"Error occurred: {e}")
             raise
-
+            
         finally:
             self.context.close()
             self.browser.close()

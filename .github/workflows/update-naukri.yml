@@ -19,46 +19,16 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y xvfb ffmpeg libgbm1 libnss3 libatk-bridge2.0-0 libgtk-3-0 libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 libasound2 fonts-liberation
+          sudo apt-get install -y xvfb libgbm1 libnss3 libatk-bridge2.0-0 libgtk-3-0 libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 libasound2
 
       - name: Install Python packages and Playwright browsers
         run: |
           pip install playwright
           playwright install chromium
 
-      - name: Run automation with xvfb-run and screen recording
+      - name: Run automation in headed mode
         env:
           NAUKRI_USERNAME: ${{ secrets.NAUKRI_USERNAME }}
           NAUKRI_PASSWORD: ${{ secrets.NAUKRI_PASSWORD }}
-          # Toggle HEADLESS mode. Set to "true" for headless runs, or "false" for headed (for recording/debugging).
-          HEADLESS: "false"
         run: |
-          # Use xvfb-run to simulate a display.
-          xvfb-run -a -s "-screen 0 1920x1080x24" bash -c '
-            # Start screen recording using ffmpeg. $DISPLAY is set by xvfb-run.
-            ffmpeg -y -f x11grab -video_size 1920x1080 -framerate 15 -i $DISPLAY -codec:v libx264 -preset ultrafast output.mp4 2> ffmpeg.log &
-            FFMPEG_PID=$!
-            
-            # Run the main automation script.
-            python update_profile.py || SCREENSHOT_NEEDED=1
-            
-            # Stop ffmpeg recording.
-            kill $FFMPEG_PID
-            wait $FFMPEG_PID
-            sleep 5
-          '
-
-      - name: Upload artifacts on failure
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: error-artifacts
-          path: |
-            screenshots/*.png
-            ffmpeg.log
-
-      - name: Upload screen recording
-        uses: actions/upload-artifact@v4
-        with:
-          name: browser-recording
-          path: output.mp4
+          xvfb-run -a -s "-screen 0 1920x1080x24" python update_profile.py
