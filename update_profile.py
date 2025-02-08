@@ -28,14 +28,12 @@ class NaukriUpdate:
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",
             viewport={"width": 1920, "height": 1080}
         )
-        
         # Hide the webdriver flag
         self.context.add_init_script("""
             Object.defineProperty(navigator, 'webdriver', {
                 get: () => undefined
             });
         """)
-        
         self.page = self.context.new_page()
 
     def login_and_update_profile(self):
