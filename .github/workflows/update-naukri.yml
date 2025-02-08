@@ -19,16 +19,16 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y xvfb libgbm1 libnss3 libatk-bridge2.0-0 libgtk-3-0 libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 libasound2t64
+          sudo apt-get install -y libgbm1 libnss3 libatk-bridge2.0-0 libgtk-3-0 libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 libasound2t64
 
       - name: Install Python packages and Playwright browsers
         run: |
           pip install playwright
           playwright install chromium
 
-      - name: Run automation in headed mode
+      - name: Run automation in headless mode
         env:
           NAUKRI_USERNAME: ${{ secrets.NAUKRI_USERNAME }}
           NAUKRI_PASSWORD: ${{ secrets.NAUKRI_PASSWORD }}
         run: |
-          xvfb-run -a -s "-screen 0 1920x1080x24" python update_profile.py
+          python update_profile.py

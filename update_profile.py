@@ -13,7 +13,7 @@ class NaukriUpdate:
 
         # Launch Chromium in headed mode (headless=False)
         self.browser = self.playwright.chromium.launch(
-            headless=False,
+            headless=True,
             args=[
                 "--disable-blink-features=AutomationControlled",
                 "--disable-notifications",
